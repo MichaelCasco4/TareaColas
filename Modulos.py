@@ -1,5 +1,3 @@
-from collections import deque
-
 
 #Clase que representa a un paciente que pide turno en la farmacia
 class Paciente:
@@ -10,45 +8,62 @@ class Paciente:
     def __str__(self):
         return f"{self.nombre} - {self.servicio}"
     
+
+class NodoPaciente:
+    def __init__(self, Paciente):
+        self.paciente = Paciente
+        self.siguiente = None
+    
 class Cola_Turnos:
 
 #Implemento una cola para generar los turnos en un orden FIFO
     def __init__(self):
-        self.cola = deque()
+        self.frente = None              
+        self.final = None    
 
     def agregar_turno(self, paciente):
 #Agrega al paciente al final de la cola
-        self.cola.append(paciente)
-
-        print(f"Turno registrado, {paciente}. \n")
+        nuevo = NodoPaciente(paciente)
+        if self.final is None:
+            # Si la cola está vacía, el nuevo paciente es tanto el primero como el último
+            self.frente = self.final = nuevo
+        else:
+            # Enlazar el nuevo paciente al final de la cola
+            self.final.siguiente = nuevo
+            self.final = nuevo
+        print(f"Paciente '{nuevo.paciente.nombre}' agregado a la cola.")
 
     def atender_turno(self):
 #Atiende al paciente que esta de primero en la cola
-        if not self.esta_vacia():
-            paciente = self.cola.popleft()   #Extrae al primer paciente de la cola (FIFO: el que llegó primero)'popleft()' elimina y retorna el primer elemento de la deque
-            print(f"El cliete {paciente} esta siendo atendido.. \n")
-            return paciente
-        else:
-#Validacion de cola vacia
-            print("En este momento no hay pacientes en espera. \n")
-            return None
+        if self.frente is None:
+            print("No hay pacientes para atender.")
+            return
+        nombre = self.frente.paciente.nombre    # Guardar el nombre del paciente atendido
+        self.frente = self.frente.siguiente  # Mover el frente al siguiente paciente
+        if self.frente is None:
+            # Si después de eliminar la cola queda vacía, actualizar el final también
+            self.final = None
+        print(f"Paciente '{nombre}' ha sido atendido.")
     
     def mostrar_pendientes(self):
 #Muestra todos los pacientes en espera
-        if not self.esta_vacia():
-            print("Turnos pendientes: ")
-            #Recorre la cola enumerando cada paciente desde el número 1
-            for i, paciente in enumerate(self.cola, start=1):
-                # Muestra el número de turno junto con la información del paciente
-                print(f"{i}. {paciente} ")
-                print()
+        if self.esta_vacia():
+            temporal = self.frente
+
+            while temporal:
+                print("Nombre:" + temporal.paciente.nombre + " " +"Servicio:" + temporal.paciente.servicio)
+                temporal = temporal.siguiente
 
         else:
             print("No hay turnos pendientes \n")
             return None
         
     def esta_vacia(self):
-        return len(self.cola) == 0
+        if self.frente is None:
+            print("La cola esta vacia!")
+            return False
+        else:
+            return True
 
 
         
